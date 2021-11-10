@@ -2,6 +2,7 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 require APPPATH . '/libraries/REST_Controller.php';
 use Restserver\Libraries\REST_Controller;
+use Firebase\JWT\JWT;
 
 class Admin extends REST_Controller {
 
@@ -27,6 +28,7 @@ class Admin extends REST_Controller {
 
 	public function index_get($id=null)
 	{
+		$this->checkToken();
 		$data = $id === null ? $this->Admin->all() : $this->Admin->getById($id);
 
 		if ($data === null) {
@@ -92,6 +94,7 @@ class Admin extends REST_Controller {
 
 	public function index_put($id)
 	{
+		$this->checkToken();
 		$params = [];
 		if ($this->put('nama') != null) $params['nama'] = $this->put('nama');
 		if ($this->put('email') != null) {
@@ -103,7 +106,7 @@ class Admin extends REST_Controller {
 			}
 			$params['email'] = $this->put('email');
 		}
-		if ($this->put('password') != null) $params['password'] = $this->put('password');
+		if ($this->put('password') != null) $params['password'] = md5($this->put('password'));
 
 		$data = $this->Admin->update($id, $params);
 
@@ -116,11 +119,11 @@ class Admin extends REST_Controller {
 
 	public function index_delete($id)
 	{
+		$this->checkToken();
 		if (!$this->Admin->delete($id)) {
 			return $this->response([
 				'success' => false,
 				'message' => "Data Gagal Dihapus",
-				'data' => $data
 			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 		}
 
@@ -129,5 +132,38 @@ class Admin extends REST_Controller {
             'message' => "Data admin berhasil dihapus",
             'data' => $this->Admin->all()
         ], REST_Controller::HTTP_OK);
+	}
+
+	public function checkToken()
+	{
+		$token = $this->input->get_request_header('Authorization');
+
+		if (empty($token)) {
+			return;
+		}
+
+		$token = explode(" ", $token);
+		if ($token[0] == "Bearer") {
+			$token = $token[1];
+		}
+
+		try {
+			$decoded = JWT::decode($token, $this->secretKey, ['HS256']);
+
+			return $this->response([
+				'success' => true,
+				'message' => "Login Berhasil",
+				'data' => [
+					'token' => $decoded
+				]
+			], REST_Controller::HTTP_OK);
+		} 
+		catch(\Throwable $th) {
+			return $this->response([
+				'success' => true,
+				'message' => "Token tidak valid",
+				'error_code' => 1204
+			], REST_Controller::HTTP_OK);
+		}
 	}
 }
