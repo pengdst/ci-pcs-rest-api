@@ -1,10 +1,13 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 require APPPATH . '/libraries/REST_Controller.php';
+require_once APPPATH . '/libraries/Firebase/JWT/JWT.php';
 use Restserver\Libraries\REST_Controller;
 use Firebase\JWT\JWT;
 
 class Product extends REST_Controller {
+
+	private $secretKey = "psho";
 
 	/**
 	 * Index Page for this controller.
@@ -28,7 +31,7 @@ class Product extends REST_Controller {
 
 	public function index_get($id=null)
 	{
-		$this->checkToken();
+		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
 		$data = $id === null ? $this->Product->all() : $this->Product->getById($id);
 
 		if ($data === null) {
@@ -47,6 +50,7 @@ class Product extends REST_Controller {
 
 	public function index_post()
 	{
+		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
 		if ($this->post('admin_id') == null) {
 			return $this->response([
 				'success' => false,
@@ -95,7 +99,7 @@ class Product extends REST_Controller {
 
 	public function index_put($id)
 	{
-		$this->checkToken();
+		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
 		$params = [];
 		if ($this->put('admin_id') != null) $params['admin_id'] = $this->put('admin_id');
 		if ($this->put('nama') != null) $params['nama'] = $this->put('nama');
@@ -113,7 +117,7 @@ class Product extends REST_Controller {
 
 	public function index_delete($id)
 	{
-		$this->checkToken();
+		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
 		if (!$this->Product->delete($id)) {
 			return $this->response([
 				'success' => false,
@@ -132,8 +136,15 @@ class Product extends REST_Controller {
 	{
 		$token = $this->input->get_request_header('Authorization');
 
+		$errResponse = [
+			'success' => false,
+			'message' => "Token tidak valid",
+			'error_code' => 1204
+		];
+
 		if (empty($token)) {
-			return;
+			$errResponse['message'] = "Token kosong!";
+			return $errResponse;
 		}
 
 		$token = explode(" ", $token);
@@ -142,22 +153,11 @@ class Product extends REST_Controller {
 		}
 
 		try {
-			$decoded = JWT::decode($token, $this->secretKey, ['HS256']);
-
-			return $this->response([
-				'success' => true,
-				'message' => "Login Berhasil",
-				'data' => [
-					'token' => $decoded
-				]
-			], REST_Controller::HTTP_OK);
+			JWT::decode($token, $this->secretKey, ['HS256']);
+			return true;
 		} 
 		catch(\Throwable $th) {
-			return $this->response([
-				'success' => true,
-				'message' => "Token tidak valid",
-				'error_code' => 1204
-			], REST_Controller::HTTP_OK);
+			return $errResponse;
 		}
 	}
 }
