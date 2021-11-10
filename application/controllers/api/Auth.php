@@ -64,37 +64,4 @@ class Auth extends REST_Controller {
 			]
         ], REST_Controller::HTTP_OK);
 	}
-
-	public function checkToken_post()
-	{
-		$token = $this->input->get_request_header('Authorization');
-
-		if (empty($token)) {
-			return;
-		}
-
-		$token = explode(" ", $token);
-		if ($token[0] == "Bearer") {
-			$token = $token[1];
-		}
-
-		try {
-			$decoded = JWT::decode($token, $this->secretKey, ['HS256']);
-
-			return $this->response([
-				'success' => true,
-				'message' => "Login Berhasil",
-				'data' => [
-					'token' => $decoded
-				]
-			], REST_Controller::HTTP_OK);
-		} 
-		catch(\Throwable $th) {
-			return $this->response([
-				'success' => true,
-				'message' => "Token tidak valid",
-				'error_code' => 1204
-			], REST_Controller::HTTP_OK);
-		}
-	}
 }
