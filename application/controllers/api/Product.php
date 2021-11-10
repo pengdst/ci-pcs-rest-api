@@ -78,16 +78,16 @@ class Product extends REST_Controller
 				'message' => "Field harga harus numeric",
 			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 		}
-		if ($this->post('stok') == null) {
+		if ($this->post('stock') == null) {
 			return $this->response([
 				'success' => false,
-				'message' => "Field stok harus diisi",
+				'message' => "Field stock harus diisi",
 			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 		}
-		if (!is_numeric($this->post('stok'))) {
+		if (!is_numeric($this->post('stock'))) {
 			return $this->response([
 				'success' => false,
-				'message' => "Field stok harus numeric",
+				'message' => "Field stock harus numeric",
 			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 		}
 
@@ -95,7 +95,7 @@ class Product extends REST_Controller
 			'admin_id' => $this->post('admin_id'),
 			'nama' => $this->post('nama'),
 			'harga' => $this->post('harga'),
-			'stok' => $this->post('stok'),
+			'stock' => $this->post('stock'),
 		];
 		if (($id = $this->Product->create($params)) === null) {
 			return $this->response([
@@ -127,14 +127,14 @@ class Product extends REST_Controller
 			}
 			$params['harga'] = $this->put('harga');
 		}
-		if ($this->put('stok') != null) {
-			if (!is_numeric($this->put('stok'))) {
+		if ($this->put('stock') != null) {
+			if (!is_numeric($this->put('stock'))) {
 				return $this->response([
 					'success' => false,
-					'message' => "Field stok harus numeric",
+					'message' => "Field stock harus numeric",
 				], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 			}
-			$params['stok'] = $this->put('stok');
+			$params['stock'] = $this->put('stock');
 		}
 
 		$data = $this->Product->update($id, $params);
