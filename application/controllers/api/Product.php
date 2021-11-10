@@ -29,6 +29,7 @@ class Product extends REST_Controller
 	function __construct()
 	{
 		parent::__construct();
+        $this->load->model('AdminModel', 'Admin');
 		$this->load->model('ProductModel', 'Product');
 	}
 
@@ -59,6 +60,12 @@ class Product extends REST_Controller
 				'success' => false,
 				'message' => "Field admin_id harus diisi",
 			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
+		}
+		if ($this->Admin->getById($this->post('admin_id'))==null) {
+			return $this->response([
+				'success' => false,
+				'message' => "Admin tidak ditemukan",
+			], REST_Controller::HTTP_NOT_FOUND);
 		}
 		if ($this->post('nama') == null) {
 			return $this->response([
@@ -116,7 +123,15 @@ class Product extends REST_Controller
 	{
 		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
 		$params = [];
-		if ($this->put('admin_id') != null) $params['admin_id'] = $this->put('admin_id');
+		if ($this->put('admin_id') != null) {
+			if ($this->Admin->getById($this->put('admin_id'))) {
+				return $this->response([
+					'success' => false,
+					'message' => "Admin tidak ditemukan",
+				], REST_Controller::HTTP_NOT_FOUND);
+			}
+			$params['admin_id'] = $this->put('admin_id');
+		}
 		if ($this->put('nama') != null) $params['nama'] = $this->put('nama');
 		if ($this->put('harga') != null) {
 			if (!is_numeric($this->put('harga'))) {
