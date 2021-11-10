@@ -202,6 +202,7 @@ class Product extends REST_Controller
 			JWT::decode($token, $this->secretKey, ['HS256']);
 			return true;
 		} catch (\Throwable $th) {
+			$errResponse['message'] = $th->getMessage();
 			return $errResponse;
 		}
 	}

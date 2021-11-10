@@ -162,6 +162,7 @@ class Admin extends REST_Controller {
 			return true;
 		} 
 		catch(\Throwable $th) {
+			$errResponse['message'] = $th->getMessage();
 			return $errResponse;
 		}
 	}
