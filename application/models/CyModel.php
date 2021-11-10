@@ -8,7 +8,7 @@ class CyModel extends CI_Model {
     public function all()
     {
         $query = $this->db->get($this->tableName);
-        return $query->row_array();
+        return $query->result();
     }
     
     public function getById($id)

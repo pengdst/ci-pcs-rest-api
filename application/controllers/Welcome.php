@@ -21,11 +21,11 @@ class Welcome extends CI_Controller {
 	function __construct() {
         parent::__construct();
 		$this->load->model('AdminModel', 'Admin');
-	 }
+	}
 
 	public function index()
 	{
-		$admins = $this->Admin->getAllAdmin();
+		$admins = $this->Admin->all();
 		$this->load->view('welcome_message', ['admins' => $admins]);
 	}
 }
