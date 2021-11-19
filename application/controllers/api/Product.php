@@ -174,6 +174,12 @@ class Product extends REST_Controller
 	public function index_delete($id)
 	{
 		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
+
+		if ($this->Product->getById($id) == null) return $this->response([
+			'success' => false,
+			'message' => "Data Tidak Ditemukan",
+		], REST_Controller::HTTP_NOT_FOUND);
+
 		if (!$this->Product->delete($id)) {
 			return $this->response([
 				'success' => false,
