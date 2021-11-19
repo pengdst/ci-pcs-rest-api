@@ -338,7 +338,7 @@ class Transaksi extends REST_Controller
 
 		return $this->response([
 			'success' => true,
-			'message' => "Data ItemTransaksi berhasil dihapus",
+			'message' => "Data Item Transaksi berhasil dihapus",
 			'data' => $this->ItemTransaksi->all()
 		], REST_Controller::HTTP_OK);
 	}
