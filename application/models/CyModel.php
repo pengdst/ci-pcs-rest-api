@@ -46,4 +46,10 @@ class CyModel extends CI_Model {
         return $this->db->delete($this->tableName);
     }
     
+    public function deleteWhere($field, $value)
+    {
+        $this->db->where($field, $value);
+        return $this->db->delete($this->tableName);
+    }
+    
 }

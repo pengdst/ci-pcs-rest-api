@@ -352,6 +352,29 @@ class Transaksi extends REST_Controller
 		], REST_Controller::HTTP_OK);
 	}
 
+	public function item_by_transaksi_delete($id)
+	{
+		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
+
+		if ($this->Transaksi->getById($id) == null) return $this->response([
+			'success' => false,
+			'message' => "Data Tidak Ditemukan",
+		], REST_Controller::HTTP_NOT_FOUND);
+
+		if (!$this->ItemTransaksi->deleteWhere('transaksi_id', $id)) {
+			return $this->response([
+				'success' => false,
+				'message' => "Data Gagal Dihapus",
+			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
+		}
+
+		return $this->response([
+			'success' => true,
+			'message' => "Data Item Transaksi berhasil dihapus",
+			'data' => $this->ItemTransaksi->all()
+		], REST_Controller::HTTP_OK);
+	}
+
 	public function checkToken()
 	{
 		$token = $this->input->get_request_header('Authorization');
