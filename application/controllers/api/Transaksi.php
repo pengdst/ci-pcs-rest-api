@@ -298,14 +298,23 @@ class Transaksi extends REST_Controller
 			}
 		}
 
-		// if ($this->put('harga') == null || $this->put('qty') == null)
-		// TODO add calculation sub_total
-
 		if (empty($params)) return $this->response([
 			'success' => false,
 			'message' => "Tidak ada perubahan data"
 		], REST_Controller::HTTP_NOT_MODIFIED);
 
+		if ($this->put('harga') == null || $this->put('qty') == null){
+			$tempData = $this->ItemTransaksi->getById($id);
+			if ($tempData === null) return $this->response([
+				'success' => false,
+				'message' => "Data tidak ditemukan"
+			], REST_Controller::HTTP_NOT_FOUND);
+			$params['harga_saat_transaksi'] = $this->put('harga') == null ? $tempData->harga_saat_transaksi : $this->put('harga');
+			$params['qty'] = $this->put('qty') == null ? $tempData->qty : $this->put('qty');
+		}
+		$params['sub_total'] = $params['qty'] * $params['harga_saat_transaksi'];
+
+		var_dump($params);die();
 		$data = $this->ItemTransaksi->update($id, $params);
 
 		if ($data === null) return $this->response([
