@@ -242,13 +242,24 @@ class Transaksi extends REST_Controller
 			'sub_total' => $this->post('harga') * $this->post('qty'),
 		]; 
 
+		$product = $this->Product->getById($params['produk_id']);
+		$newStock = $product->stock - $params['qty'];
+		$product = $this->Product->update($params['produk_id'], [
+			'stock' => $newStock
+		]);
+
+		if ($product === null) return $this->response([
+			'success' => false,
+			'message' => "Gagal update stock produk"
+		], REST_Controller::HTTP_NOT_FOUND);
+
 		if (($id = $this->ItemTransaksi->create($params)) === null) {
 			return $this->response([
 				'success' => false,
 				'message' => "Insert Data Gagal",
 			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 		}
-		$data = $data = $this->ItemTransaksi->getById($id);
+		$data = $this->ItemTransaksi->getById($id);
 
 		return $this->response([
 			'success' => true,
