@@ -31,6 +31,8 @@ class Transaksi extends REST_Controller
 		parent::__construct();
         $this->load->model('AdminModel', 'Admin');
 		$this->load->model('TransaksiModel', 'Transaksi');
+		$this->load->model('ItemTransaksiModel', 'ItemTransaksi');
+		$this->load->model('ProductModel', 'Product');
 	}
 
 	public function index_get($id = null)
@@ -170,7 +172,7 @@ class Transaksi extends REST_Controller
 	public function item_get($id = null)
 	{
 		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
-		$data = $id === null ? $this->Transaksi->all() : $this->Transaksi->getById($id);
+		$data = $id === null ? $this->ItemTransaksi->all() : $this->ItemTransaksi->getById($id);
 
 		if ($data === null) {
 			return $this->response([
@@ -189,47 +191,68 @@ class Transaksi extends REST_Controller
 	public function item_post()
 	{
 		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
-		if ($this->post('admin_id') == null) {
+		if ($this->post('transaksi_id') == null) {
 			return $this->response([
 				'success' => false,
-				'message' => "Field admin_id harus diisi",
+				'message' => "Field transaksi_id harus diisi",
 			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 		}
-		if ($this->Admin->getById($this->post('admin_id'))==null) {
+		if ($this->Transaksi->getById($this->post('transaksi_id'))==null) {
 			return $this->response([
 				'success' => false,
-				'message' => "Admin tidak ditemukan",
+				'message' => "Transaksi tidak ditemukan",
 			], REST_Controller::HTTP_NOT_FOUND);
 		}
-		if ($this->post('total') == null) {
+		if ($this->post('product_id') == null) {
 			return $this->response([
 				'success' => false,
-				'message' => "Field total harus diisi",
+				'message' => "Field product_id harus diisi",
 			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 		}
-		if (!is_numeric($this->post('total'))) {
+		if ($this->Product->getById($this->post('product_id'))==null) {
 			return $this->response([
 				'success' => false,
-				'message' => "Field total harus numeric",
+				'message' => "Product tidak ditemukan",
+			], REST_Controller::HTTP_NOT_FOUND);
+		}
+		if ($this->post('qty') == null) {
+			return $this->response([
+				'success' => false,
+				'message' => "Field qty harus diisi",
+			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
+		}
+		if (!is_numeric($this->post('qty'))) {
+			return $this->response([
+				'success' => false,
+				'message' => "Field qty harus numeric",
+			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
+		}
+		if ($this->post('harga') == null) {
+			return $this->response([
+				'success' => false,
+				'message' => "Field harga harus diisi",
 			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 		}
 
 		$params = [
-			'admin_id' => $this->post('admin_id'),
-			'total' => $this->post('total'),
-			'tanggal' => date("Y-m-d H:i:s"),
-		];
-		if (($id = $this->Transaksi->create($params)) === null) {
+			'transaksi_id' => $this->post('transaksi_id'),
+			'produk_id' => $this->post('product_id'),
+			'qty' => $this->post('qty'),
+			'harga_saat_transaksi' => $this->post('harga'),
+			'sub_total' => $this->post('harga') * $this->post('qty'),
+		]; 
+
+		if (($id = $this->ItemTransaksi->create($params)) === null) {
 			return $this->response([
 				'success' => false,
 				'message' => "Insert Data Gagal",
 			], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 		}
-		$data = $data = $this->Transaksi->getById($id);
+		$data = $data = $this->ItemTransaksi->getById($id);
 
 		return $this->response([
 			'success' => true,
-			'message' => "Data Transaksi berhasil ditambahkan",
+			'message' => "Data Item Transaksi berhasil ditambahkan",
 			'data' => $data
 		], REST_Controller::HTTP_OK);
 	}
@@ -238,33 +261,52 @@ class Transaksi extends REST_Controller
 	{
 		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
 		$params = [];
-		if ($this->put('admin_id') != null) {
-			if ($this->Admin->getById($this->put('admin_id'))) {
+		if ($this->put('transaksi_id') != null) {
+			if ($this->Transaksi->getById($this->put('transaksi_id'))==null) {
 				return $this->response([
 					'success' => false,
-					'message' => "Admin tidak ditemukan",
+					'message' => "Transaksi tidak ditemukan",
 				], REST_Controller::HTTP_NOT_FOUND);
 			}
-			$params['admin_id'] = $this->put('admin_id');
+			$params['transaksi_id'] = $this->put('transaksi_id');
 		}
-		if ($this->put('total') != null) {
-			if (!is_numeric($this->put('total'))) {
+		if ($this->put('product_id') != null) {
+			if ($this->Product->getById($this->put('product_id'))==null) {
 				return $this->response([
 					'success' => false,
-					'message' => "Field total harus numeric",
+					'message' => "Product tidak ditemukan",
+				], REST_Controller::HTTP_NOT_FOUND);
+			}
+			$params['product_id'] = $this->put('product_id');
+		}
+		if ($this->put('qty') != null) {
+			if (!is_numeric($this->put('qty'))) {
+				return $this->response([
+					'success' => false,
+					'message' => "Field qty harus numeric",
 				], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 			}
-			$params['total'] = $this->put('total');
+			$params['qty'] = $this->put('qty');
 		}
+		if ($this->put('harga') != null) {
+			if (!is_numeric($this->put('harga'))) {
+				return $this->response([
+					'success' => false,
+					'message' => "Field harga harus numeric",
+				], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
+				$params['harga'] = $this->put('harga');
+			}
+		}
+
+		// if ($this->put('harga') == null || $this->put('qty') == null)
+		// TODO add calculation sub_total
 
 		if (empty($params)) return $this->response([
 			'success' => false,
 			'message' => "Tidak ada perubahan data"
 		], REST_Controller::HTTP_NOT_MODIFIED);
 
-		$params['tanggal'] = date("Y-m-d H:i:s");
-
-		$data = $this->Transaksi->update($id, $params);
+		$data = $this->ItemTransaksi->update($id, $params);
 
 		if ($data === null) return $this->response([
 			'success' => false,
@@ -273,7 +315,7 @@ class Transaksi extends REST_Controller
 
 		return $this->response([
 			'success' => true,
-			'message' => "Data Transaksi berhasil diupdate",
+			'message' => "Data ItemTransaksi berhasil diupdate",
 			'data' => $data
 		], REST_Controller::HTTP_OK);
 	}
@@ -282,12 +324,12 @@ class Transaksi extends REST_Controller
 	{
 		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
 
-		if ($this->Transaksi->getById($id) == null) return $this->response([
+		if ($this->ItemTransaksi->getById($id) == null) return $this->response([
 			'success' => false,
 			'message' => "Data Tidak Ditemukan",
 		], REST_Controller::HTTP_NOT_FOUND);
 
-		if (!$this->Transaksi->delete($id)) {
+		if (!$this->ItemTransaksi->delete($id)) {
 			return $this->response([
 				'success' => false,
 				'message' => "Data Gagal Dihapus",
@@ -296,8 +338,8 @@ class Transaksi extends REST_Controller
 
 		return $this->response([
 			'success' => true,
-			'message' => "Data Transaksi berhasil dihapus",
-			'data' => $this->Transaksi->all()
+			'message' => "Data ItemTransaksi berhasil dihapus",
+			'data' => $this->ItemTransaksi->all()
 		], REST_Controller::HTTP_OK);
 	}
 
