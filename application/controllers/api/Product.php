@@ -152,7 +152,17 @@ class Product extends REST_Controller
 			$params['stock'] = $this->put('stock');
 		}
 
+		if (empty($params)) return $this->response([
+			'success' => false,
+			'message' => "Tidak ada perubahan data"
+		], REST_Controller::HTTP_NOT_MODIFIED);
+
 		$data = $this->Product->update($id, $params);
+
+		if ($data === null) return $this->response([
+			'success' => false,
+			'message' => "Data tidak ditemukan"
+		], REST_Controller::HTTP_NOT_FOUND);
 
 		return $this->response([
 			'success' => true,

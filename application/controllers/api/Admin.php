@@ -111,7 +111,17 @@ class Admin extends REST_Controller {
 		}
 		if ($this->put('password') != null) $params['password'] = md5($this->put('password'));
 
+		if (empty($params)) return $this->response([
+			'success' => false,
+			'message' => "Tidak ada perubahan data"
+		], REST_Controller::HTTP_NOT_MODIFIED);
+
 		$data = $this->Admin->update($id, $params);
+
+		if ($data === null) return $this->response([
+			'success' => false,
+			'message' => "Data tidak ditemukan"
+		], REST_Controller::HTTP_NOT_FOUND);
 
 		return $this->response([
             'success' => true,
