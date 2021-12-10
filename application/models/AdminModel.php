@@ -17,4 +17,10 @@ class AdminModel extends CyModel {
         return parent::getById($id);
     }
     
+    public function singleWhere($data)
+    {
+        $this->db->select(['id', 'email', 'nama']);
+        return parent::singleWhere($data);
+    }
+    
 }
