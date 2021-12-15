@@ -19,14 +19,4 @@ class TransaksiModel extends CyModel {
         return parent::mapObjToModel($model);
     }
     
-    public function all()
-    {
-        $results = parent::all();
-        foreach($results as $key => $transaction){
-            // $transactions[$key]['answers'] = $answers_model->get_answers_by_transaction_id($transaction['transaction_id']);
-            $results[$key] = $this->mapObjToModel($transaction);
-        }
-        return $results;
-    }
-    
 }

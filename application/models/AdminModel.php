@@ -4,23 +4,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class AdminModel extends CyModel {
 
     protected $tableName = "admin";
-    
-    public function all()
+
+    public function mapObjToModel($obj)
     {
-        $this->db->select(['id', 'email', 'nama']);
-        return parent::all();
-    }
-    
-    public function getById($id)
-    {
-        $this->db->select(['id', 'email', 'nama']);
-        return parent::getById($id);
-    }
-    
-    public function singleWhere($data)
-    {
-        $this->db->select(['id', 'email', 'nama']);
-        return parent::singleWhere($data);
+        if ($obj == null) return $obj;
+
+        $model = new AdminModel();
+        $model->id = (int) $obj->id;
+        $model->email = $obj->email;
+        $model->nama = $obj->nama;
+
+        return parent::mapObjToModel($model);
     }
     
 }
