@@ -305,8 +305,17 @@ class Transaksi extends REST_Controller
 					'success' => false,
 					'message' => "Field harga harus numeric",
 				], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
-				$params['harga'] = $this->put('harga');
 			}
+			$params['harga_saat_transaksi'] = $this->put('harga');
+		}
+		if ($this->put('harga_saat_transaksi') != null) {
+			if (!is_numeric($this->put('harga_saat_transaksi'))) {
+				return $this->response([
+					'success' => false,
+					'message' => "Field harga_saat_transaksi harus numeric",
+				], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
+			}
+			$params['harga_saat_transaksi'] = $this->put('harga');
 		}
 
 		if (empty($params)) return $this->response([
@@ -325,7 +334,6 @@ class Transaksi extends REST_Controller
 		}
 		$params['sub_total'] = $params['qty'] * $params['harga_saat_transaksi'];
 
-		var_dump($params);die();
 		$data = $this->ItemTransaksi->update($id, $params);
 
 		if ($data === null) return $this->response([
