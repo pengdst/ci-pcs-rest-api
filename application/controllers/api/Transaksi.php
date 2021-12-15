@@ -315,7 +315,7 @@ class Transaksi extends REST_Controller
 					'message' => "Field harga_saat_transaksi harus numeric",
 				], REST_Controller::HTTP_UNPROCESSABLE_ENTITY);
 			}
-			$params['harga_saat_transaksi'] = $this->put('harga');
+			$params['harga_saat_transaksi'] = $this->put('harga_saat_transaksi');
 		}
 
 		if (empty($params)) return $this->response([
