@@ -124,7 +124,7 @@ class Product extends REST_Controller
 		if ($this->checkToken() !== true) return $this->response($this->checkToken(), REST_Controller::HTTP_UNAUTHORIZED);
 		$params = [];
 		if ($this->put('admin_id') != null) {
-			if ($this->Admin->getById($this->put('admin_id'))) {
+			if ($this->Admin->getById($this->put('admin_id')) == null) {
 				return $this->response([
 					'success' => false,
 					'message' => "Admin tidak ditemukan",
