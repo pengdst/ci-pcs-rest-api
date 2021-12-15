@@ -13,11 +13,9 @@ class CyModel extends CI_Model {
     public function all()
     {
         $query = $this->db->get($this->tableName);
-        $results = $query->result();
-        foreach($results as $key => $obj){
-            $results[$key] = $this->mapObjToModel($obj);
-        }
-        return $results;
+        return array_map(function($obj) {
+            return $this->mapObjToModel($obj);
+        }, $query->result());
     }
     
     public function getById($id)
