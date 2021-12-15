@@ -4,17 +4,26 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 class CyModel extends CI_Model {
 
     protected $tableName;
+
+    public function mapObjToModel($obj)
+    {
+        return $obj;
+    }
     
     public function all()
     {
         $query = $this->db->get($this->tableName);
-        return $query->result();
+        $results = $query->result();
+        foreach($results as $key => $obj){
+            $results[$key] = $this->mapObjToModel($obj);
+        }
+        return $results;
     }
     
     public function getById($id)
     {
         $query = $this->db->get_where($this->tableName, ['id' => $id]);
-        return $query->row();
+        return $this->mapObjToModel($query->row());
     }
 
     public function getWhere($data) {
@@ -24,7 +33,7 @@ class CyModel extends CI_Model {
 
     public function singleWhere($data) {
         $query = $this->db->get_where($this->tableName, $data);
-        return $query->row();
+        return $this->mapObjToModel($query->row());
     }
     
     public function create($data)
